@@ -332,13 +332,30 @@
             height: 100%;
             flex: 1;
             min-height: 0;
+            margin-top: 1px;
         }
 
         .tradingview-widget-container {
             width: 100%;
             height: 46px;
-            background-color: #1e222d;
+            background-color: #131722;
             border-bottom: 1px solid rgba(42, 46, 57, 0.8);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .tradingview-widget-container::after {
+            content: '';
+            position: absolute;
+            bottom: -13px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: #131722;
+            box-shadow: 
+                0 -1px 0 rgba(255, 255, 255, 0.05),
+                0 1px 0 rgba(0, 0, 0, 0.2),
+                0 0 8px rgba(41, 98, 255, 0.1);
         }
 
         .tradingview-widget-container .blue-text {
@@ -404,6 +421,20 @@
         .fear-greed.extreme-greed { color: #26a69a; }
 
         @media screen and (max-width: 768px) {
+            .tradingview-widget-container {
+                height: 38px;
+                margin-bottom: 8px;
+            }
+
+            .tradingview-widget-container::after {
+                bottom: -8px;
+                height: 2px;
+                box-shadow: 
+                    0 -1px 0 rgba(255, 255, 255, 0.05),
+                    0 1px 0 rgba(0, 0, 0, 0.25),
+                    0 0 10px rgba(41, 98, 255, 0.15);
+            }
+
             .header {
                 flex-direction: column;
                 height: auto;
@@ -578,6 +609,16 @@
 
             .tradingview-widget-container {
                 height: 38px;
+                margin-bottom: 16px;
+            }
+
+            .tradingview-widget-container::after {
+                bottom: -13px;
+                height: 10px;
+                box-shadow: 
+                    0 -1px 0 rgba(255, 255, 255, 0.05),
+                    0 1px 0 rgba(0, 0, 0, 0.25),
+                    0 0 10px rgba(41, 98, 255, 0.15);
             }
         }
 
@@ -676,11 +717,12 @@
         /* Widget Container Styles */
         .widgets-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-            margin-bottom: -86px !important;
-            padding: 0 10px;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            grid-auto-flow: dense;
+            gap: clamp(3px, 0.5vw, 10px);
+            margin-top: clamp(5px, 1vw, 10px);
+            margin-bottom: clamp(-86px, -8vw, -40px) !important;
+            padding: clamp(5px, 1vw, 9px);
             width: 100%;
             box-sizing: border-box;
             position: relative;
@@ -695,7 +737,7 @@
 
         @media screen and (max-width: 1200px) {
             .widgets-container {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
             }
         }
 
@@ -2353,4 +2395,4 @@
         });
     </script>
 </body>
-</html>
+</html></html>

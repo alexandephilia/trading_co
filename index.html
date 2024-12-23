@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradingView Clone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -94,7 +97,8 @@
         }
 
         .logo-text {
-            font-weight: 800;
+            font-family: 'Lilita One', cursive;
+            font-weight: 400;
             letter-spacing: -0.5px;
             font-size: clamp(18px, 1.8vw, 22px);
             background: linear-gradient(
@@ -119,20 +123,22 @@
         }
 
         .logo-text sup {
+            font-family: 'Lilita One', cursive;
             font-size: 0.6em;
             vertical-align: super;
-            font-weight: 600;
+            font-weight: 400;
             margin-left: 2px;
             margin-top: 2px;
             animation: shine 3s linear infinite;
         }
 
         .logo-subtext {
-            font-weight: 600;
+            font-family: 'Lilita One', cursive;
+            font-weight: 400;
             font-size: clamp(12px, 1.2vw, 14px);
             background: linear-gradient(
                 90deg,
-                #fff 0%,
+                #ffffff 0%,
                 #838383 25%,
                 #fff 50%,
                 #838383 75%,
@@ -154,7 +160,7 @@
             }
 
             .logo-text {
-                font-size: clamp(29px, 2vw, 24px);
+                font-size: clamp(37px, 2vw, 24px);
             }
 
             .logo-subtext {
@@ -1341,8 +1347,20 @@
                     "proName": "BINANCE:FETUSDT"
                 },
                 {
-                    "description": "PEPE",
+                    "description": "PEPE", 
                     "proName": "BINANCE:PEPEUSDT"
+                },
+                {
+                    "description": "Moodeng",
+                    "proName": "BINANCE:MOODENGUSDT.P"
+                },
+                {
+                    "description": "ADA",
+                    "proName": "BINANCE:ADAUSDT"
+                },
+                    {
+                    "description": "MOG",
+                    "proName": "BYBIT:MOGUSDT"
                 }
             ],
             "showSymbolLogo": true,

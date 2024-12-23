@@ -1280,6 +1280,8 @@
                 <option value="BINANCE:SOLUSDT">SOLUSDT</option>
                 <option value="BINANCE:SUIUSDT">SUIUSDT</option>
                 <option value="BINANCE:FETUSDT">FETUSDT</option>
+                <option value="BINANCE:PEPEUSDT">PEPEUSDT</option>
+                <option value="BINANCE:MOODENGUSDT.P">MOODENGUSDT</option>
             </select>
             <div class="indicator-value">Loading...</div>
   
@@ -1327,8 +1329,20 @@
                     "proName": "BINANCE:BTCUSDT"
                 },
                 {
+                    "description": "ETH",
+                    "proName": "BINANCE:ETHUSDT"
+                },
+                {
                     "description": "STX",
                     "proName": "BINANCE:STXUSDT"
+                },
+                {
+                    "description": "ADA",
+                    "proName": "BINANCE:ADAUSDT"
+                },
+                {
+                    "description": "DOGE",
+                    "proName": "BINANCE:DOGEUSDT"
                 },
                 {
                     "description": "SOL",
@@ -1339,28 +1353,16 @@
                     "proName": "BINANCE:SUIUSDT"
                 },
                 {
-                    "description": "ETH",
-                    "proName": "BINANCE:ETHUSDT"
-                },
-                {
                     "description": "FET",
                     "proName": "BINANCE:FETUSDT"
                 },
                 {
-                    "description": "PEPE", 
+                    "description": "PEPE",
                     "proName": "BINANCE:PEPEUSDT"
                 },
                 {
-                    "description": "Moodeng",
+                    "description": "MOODENG",
                     "proName": "BINANCE:MOODENGUSDT.P"
-                },
-                {
-                    "description": "ADA",
-                    "proName": "BINANCE:ADAUSDT"
-                },
-                    {
-                    "description": "MOG",
-                    "proName": "BYBIT:MOGUSDT"
                 }
             ],
             "showSymbolLogo": true,
@@ -1622,13 +1624,10 @@
         let widgetsVisible = true;
 
         function connectWebSocket(symbol) {
-            // Only set loading state during symbol change
-            const currentSymbol = document.getElementById('symbol-selector').value;
-            if (currentSymbol !== symbol) {
-                setLoadingState();
-            }
+            // Set loading state immediately for better UX
+            setLoadingState();
 
-            // Close existing connections
+            // Close existing connections properly
             if (socket) {
                 socket.close();
                 socket = null;
@@ -1638,46 +1637,68 @@
                 volumeSocket = null;
             }
 
-            const binanceSymbol = symbol.replace('BINANCE:', '').toLowerCase();
+            // Handle perpetual futures differently
+            const isPerpetual = symbol.includes('.P');
+            const binanceSymbol = symbol.replace('BINANCE:', '').replace('.P', '').toLowerCase();
+            const wsEndpoint = isPerpetual ? 'wss://fstream.binance.com' : 'wss://stream.binance.com:9443';
             
             try {
                 // First, fetch initial data using REST API
-                fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol.toUpperCase()}`)
-                    .then(response => response.json())
+                const apiEndpoint = isPerpetual 
+                    ? `https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${binanceSymbol.toUpperCase()}`
+                    : `https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol.toUpperCase()}`;
+
+                fetch(apiEndpoint)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         // Update indicators with initial data
                         if (data.lastPrice && data.priceChangePercent) {
-                            const currentSymbolNow = document.getElementById('symbol-selector').value;
-                            const currentBinanceSymbol = currentSymbolNow.replace('BINANCE:', '').toLowerCase();
-                            
-                            // Only update if this is still the selected symbol
-                            if (currentBinanceSymbol === binanceSymbol) {
-                                updateIndicators(
-                                    data.lastPrice,
-                                    data.priceChangePercent,
-                                    data.volume,
-                                    data.quoteVolume,
-                                    data.count,
-                                    data
-                                );
-                            }
+                            updateIndicators(
+                                data.lastPrice,
+                                data.priceChangePercent,
+                                data.volume,
+                                data.quoteVolume || data.volume * data.lastPrice,
+                                data.count,
+                                data
+                            );
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching initial data:', error);
+                        setLoadingState(); // Keep loading state on error
                     });
 
                 // Then connect to WebSocket for real-time updates
-                socket = new WebSocket(`wss://stream.binance.com:9443/ws/${binanceSymbol}@ticker`);
+                socket = new WebSocket(`${wsEndpoint}/ws/${binanceSymbol}@ticker`);
 
                 socket.onopen = () => {
                     console.log(`Ticker WebSocket connected for ${binanceSymbol}`);
                     reconnectAttempts = 0;
+
+                    // Send a ping message to keep the connection alive
+                    const pingInterval = setInterval(() => {
+                        if (socket && socket.readyState === WebSocket.OPEN) {
+                            socket.send(JSON.stringify({ method: "PING" }));
+                        } else {
+                            clearInterval(pingInterval);
+                        }
+                    }, 30000);
                 };
 
                 socket.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
+                        
+                        // Handle ping/pong messages
+                        if (data.pong) {
+                            return;
+                        }
+
                         if (data.c && data.P) {  // Check for close price and price change percentage
                             const price = parseFloat(data.c).toFixed(2);
                             const priceChange = parseFloat(data.P).toFixed(2);
@@ -1685,16 +1706,7 @@
                             const quoteVolume24h = parseFloat(data.q);
                             const trades24h = parseInt(data.n);
                             
-                            // Update only if this is still the current symbol
-                            const currentSymbol = document.getElementById('symbol-selector').value;
-                            const currentBinanceSymbol = currentSymbol.replace('BINANCE:', '').toLowerCase();
-                            
-                            if (currentBinanceSymbol === binanceSymbol) {
-                                updateIndicators(price, priceChange, volume24h, quoteVolume24h, trades24h, data);
-                            } else {
-                                // Wrong symbol, close this connection
-                                socket.close();
-                            }
+                            updateIndicators(price, priceChange, volume24h, quoteVolume24h, trades24h, data);
                         }
                     } catch (error) {
                         console.error('Error processing ticker data:', error);
@@ -1708,13 +1720,7 @@
 
                 socket.onclose = (event) => {
                     console.log(`Ticker WebSocket closed for ${binanceSymbol}:`, event.code, event.reason);
-                    const currentSymbol = document.getElementById('symbol-selector').value;
-                    const currentBinanceSymbol = currentSymbol.replace('BINANCE:', '').toLowerCase();
-                    
-                    // Only attempt reconnect if this is still the selected symbol
-                    if (currentBinanceSymbol === binanceSymbol) {
-                        handleReconnect(symbol);
-                    }
+                    handleReconnect(symbol);
                 };
 
             } catch (error) {
@@ -1748,6 +1754,7 @@
             // Remove any existing classes
             percentElement.classList.remove('positive', 'negative');
             sentimentElement.parentElement.classList.remove('bullish', 'bearish');
+            // Don't reset fear-greed index
         }
 
         function updateIndicators(price, priceChange, volume24h, quoteVolume24h, trades24h, data) {
@@ -1998,33 +2005,32 @@
 
         // Initialize the widget and set up event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the widget with default symbol
-            initWidget();
+            // Get the currently selected symbol from the dropdown
+            const symbolSelector = document.getElementById('symbol-selector');
+            const currentSymbol = symbolSelector.value;
+
+            // Initialize WebSocket with the current symbol
+            connectWebSocket(currentSymbol);
+
+            // Initialize widget with the current symbol
+            widget = createWidget(currentSymbol);
+
+            // Initialize Fear & Greed Index
+            updateFearGreedIndex();
 
             // Add event listener for symbol changes
-            document.getElementById('symbol-selector').addEventListener('change', function(e) {
+            symbolSelector.addEventListener('change', function(e) {
                 const symbol = e.target.value;
                 
-                // Set loading state before changing symbol
-                setLoadingState();
-                
-                // Close existing WebSocket connection if any
-                if (socket) {
-                    socket.close();
-                    socket = null;
-                }
-                
-                // Reset reconnection attempts for new symbol
-                reconnectAttempts = 0;
+                // Update both WebSocket and widget
+                connectWebSocket(symbol);
                 
                 // Properly clean up old widget and create new one
                 if (widget) {
                     widget.remove();
                     widget = null;
                 }
-                
-                // Initialize new widget with new symbol
-                initWidget(symbol);
+                widget = createWidget(symbol);
             });
 
             // Add event listeners for both desktop and mobile draw buttons

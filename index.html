@@ -1186,7 +1186,45 @@
 
         @media screen and (max-width: 768px) {
             .news-timeline-container {
-                display: none;
+                display: flex;
+                right: -300px;
+                width: 300px;
+                top: 102px;
+                bottom: 100px;
+            }
+
+            .news-toggle-button {
+                width: 36px;
+                height: 36px;
+                left: -36px;
+            }
+
+            .news-toggle-button i {
+                font-size: 14px;
+            }
+
+            /* Remove padding-bottom from chart container */
+            .chart-container {
+                height: calc(100vh - 246px);
+                min-height: 400px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .news-timeline-container {
+                right: -260px;
+                width: 260px;
+                bottom: 120px;
+            }
+
+            .news-toggle-button {
+                width: 32px;
+                height: 32px;
+                left: -32px;
+            }
+
+            .news-toggle-button i {
+                font-size: 12px;
             }
         }
     </style>
@@ -1402,13 +1440,13 @@
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
         {
             "symbols": [
-                ["BINANCE:BTCUSDT|1D"],
-                ["BINANCE:STXUSDT|1D"],
-                ["BINANCE:SOLUSDT|1D"],
-                ["BINANCE:ETHUSDT|1D"],
-                ["BINANCE:SUIUSDT|1D"],
-                ["BINANCE:FETUSDT|1D"],
-                ["BINANCE:PEPEUSDT|1D"]
+                ["BINANCE:BTCUSDT|1M"],
+                ["BINANCE:STXUSDT|1M"],
+                ["BINANCE:SOLUSDT|1M"],
+                ["BINANCE:ETHUSDT|1M"],
+                ["BINANCE:SUIUSDT|1M"],
+                ["BINANCE:FETUSDT|1M"],
+                ["BINANCE:PEPEUSDT|1M"]
             ],
             "chartOnly": false,
             "width": "100%",

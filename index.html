@@ -889,6 +889,306 @@
         #toggleHeatmap .stat-item i {
             font-size: 9px;
         }
+
+        /* Symbol Overview Toggle Bar */
+        .widget-toggle-bar {
+            width: 100%;
+            padding: 12px 25px;
+            background: linear-gradient(90deg, rgba(30,34,45,0.98) 0%, rgba(38,41,51,0.98) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #d1d4dc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .widget-toggle-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .widget-toggle-bar:hover::before {
+            transform: translateX(100%);
+        }
+
+        .widget-toggle-bar:hover {
+            background: linear-gradient(90deg, rgba(38,41,51,0.98) 0%, rgba(46,49,59,0.98) 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
+        }
+
+        .widget-toggle-bar:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.1s ease;
+        }
+
+        .widget-toggle-bar .toggle-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            height: 24px;
+            line-height: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .widget-toggle-bar .toggle-text {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            background: linear-gradient(45deg, #d1d4dc 30%, #ffffff 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255,255,255,0.1);
+            line-height: 24px;
+            display: flex;
+            align-items: center;
+            padding-top: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .widget-toggle-bar .toggle-icon {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #d1d1d1;
+            font-size: 12px;
+            filter: drop-shadow(0 0 8px rgba(41,98,255,0.4));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 24px;
+            width: 1px;
+            line-height: 0;
+            margin-top: 0;
+            position: relative;
+            top: 1px;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .widget-toggle-bar.collapsed {
+            padding: 10px 25px;
+            background: linear-gradient(90deg, rgba(30,34,45,0.85) 0%, rgba(38,41,51,0.85) 100%);
+            backdrop-filter: blur(10px);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .widget-toggle-bar.collapsed .toggle-icon {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: none;
+        }
+
+        .widget-toggle-bar.collapsed .toggle-text {
+            background: linear-gradient(45deg, #8b8d91 30%, #d1d4dc 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transform: translateY(1px);
+        }
+
+        .widget-toggle-bar .widget-stats {
+            position: absolute;
+            right: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 11px;
+            color: rgba(209,212,220,0.7);
+            transition: all 0.3s ease;
+        }
+
+        .widget-toggle-bar .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .widget-toggle-bar .stat-item i {
+            font-size: 10px;
+            color: #2962ff;
+            filter: drop-shadow(0 0 6px rgba(41,98,255,0.3));
+            transition: all 0.3s ease;
+        }
+
+        .widget-toggle-bar.collapsed .widget-stats {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .widget-toggle-bar {
+                padding: 10px 15px;
+            }
+            
+            .widget-toggle-bar .toggle-text {
+                font-size: 12px;
+            }
+
+            .widget-toggle-bar .widget-stats {
+                display: none;
+            }
+        }
+
+        /* Symbol Overview Widget Styles */
+        .symbol-overview-widget {
+            width: 100%;
+            height: 420px;
+            min-height: 420px;
+            position: relative;
+            background: none;
+            border: none;
+            display: block;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            margin: 0;
+            padding: 0;
+        }
+
+        .symbol-overview-widget .tradingview-widget-container__widget {
+            width: 100%;
+            height: 100%;
+            min-height: 800px;
+        }
+
+        .symbol-overview-widget .tradingview-widget-copyright {
+            display: none !important;
+        }
+
+        @media screen and (max-width: 768px) {
+            .symbol-overview-widget {
+                height: 600px;
+                min-height: 600px;
+            }
+
+            .symbol-overview-widget .tradingview-widget-container__widget {
+                height: 600px;
+                min-height: 600px;
+            }
+        }
+
+        /* News Timeline Widget Styles */
+        .news-timeline-container {
+            position: fixed;
+            right: -400px; /* Initially hidden */
+            top: 102px; /* Align with the top of chart container */
+            bottom: 86px; /* Add space from bottom to avoid touching the edge */
+            width: 400px;
+            background: #1e222d;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            border-radius: 0 0 0 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: none;
+        }
+
+        .news-timeline-container.open {
+            right: 0;
+        }
+
+        .news-toggle-button {
+            position: absolute;
+            left: -48px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(30, 34, 45, 0.95), rgba(38, 41, 51, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-right: none;
+            color: #d1d4dc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px 0 0 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+        }
+
+        .news-toggle-button:hover {
+            background: linear-gradient(135deg, rgba(38, 41, 51, 0.95), rgba(46, 49, 59, 0.95));
+            color: #fff;
+            box-shadow: -6px 0 20px rgba(41, 98, 255, 0.2),
+                       -2px 0 6px rgba(41, 98, 255, 0.1);
+            border-color: rgba(41, 98, 255, 0.3);
+        }
+
+        .news-toggle-button:active {
+            box-shadow: -3px 0 10px rgba(41, 98, 255, 0.15);
+            transition: all 0.1s ease;
+        }
+
+        .news-toggle-button i {
+            font-size: 18px;
+            color: #d1d4dc;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 0 10px rgba(41, 98, 255, 0.2);
+            position: relative;
+            left: 0;
+            top: 0;
+        }
+
+        .news-toggle-button:hover i {
+            color: #fff;
+            text-shadow: 0 0 15px rgba(41, 98, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .news-timeline-container.open .news-toggle-button {
+            border-radius: 6px 0 0 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .news-timeline-container.open .news-toggle-button i {
+            transform: rotate(0deg);
+            left: 0;
+            top: 0;
+        }
+
+        .news-timeline-container.open .news-toggle-button i:before {
+            content: "\f054"; /* Font Awesome chevron-right icon */
+        }
+
+        .news-timeline-container.open .news-toggle-button:hover i {
+            transform: scale(1.1);
+        }
+
+        .tradingview-widget-container.timeline-widget {
+            width: 100%;
+            height: 100%;
+            background: none;
+            border: none;
+            padding: 1px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .news-timeline-container {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -965,8 +1265,20 @@
                     "proName": "BINANCE:SOLUSDT"
                 },
                 {
+                    "description": "SUI",
+                    "proName": "BINANCE:SUIUSDT"
+                },
+                {
                     "description": "ETH",
                     "proName": "BINANCE:ETHUSDT"
+                },
+                {
+                    "description": "FET",
+                    "proName": "BINANCE:FETUSDT"
+                },
+                {
+                    "description": "PEPE",
+                    "proName": "BINANCE:PEPEUSDT"
                 }
             ],
             "showSymbolLogo": true,
@@ -1064,13 +1376,99 @@
             }
             </script>
         </div>
-
-       
     </div>
-      
+       <!-- Symbol Overview Toggle Bar -->
+    <div class="widget-toggle-bar collapsed" id="toggleSymbolOverview">
+        <div class="toggle-content">
+            <span class="toggle-text">Show Symbol Overview</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="widget-stats">
+            <div class="stat-item">
+                <i class="fas fa-chart-area"></i>
+                <span>7 Markets</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span>Multi-timeframe</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Symbol Overview Widget Container -->
+    <div class="tradingview-widget-container symbol-overview-widget" style="display: none;">
+        <div class="tradingview-widget-container__widget"></div>
+        <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
+        {
+            "symbols": [
+                ["BINANCE:BTCUSDT|1D"],
+                ["BINANCE:STXUSDT|1D"],
+                ["BINANCE:SOLUSDT|1D"],
+                ["BINANCE:ETHUSDT|1D"],
+                ["BINANCE:SUIUSDT|1D"],
+                ["BINANCE:FETUSDT|1D"],
+                ["BINANCE:PEPEUSDT|1D"]
+            ],
+            "chartOnly": false,
+            "width": "100%",
+            "height": "100%",
+            "locale": "en",
+            "colorTheme": "dark",
+            "autosize": true,
+            "showVolume": false,
+            "showMA": false,
+            "hideDateRanges": false,
+            "hideMarketStatus": false,
+            "hideSymbolLogo": false,
+            "scalePosition": "right",
+            "scaleMode": "Normal",
+            "fontFamily": "-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif",
+            "fontSize": "10",
+            "noTimeScale": false,
+            "valuesTracking": "1",
+            "changeMode": "price-and-percent",
+            "chartType": "area",
+            "maLineColor": "#2962FF",
+            "maLineWidth": 1,
+            "maLength": 9,
+            "headerFontSize": "medium",
+            "lineWidth": 2,
+            "lineType": 0,
+            "dateRanges": [
+                "1d|1",
+                "1m|30",
+                "3m|60",
+                "12m|1D",
+                "60m|1W",
+                "all|1M"
+            ]
+        }
+        </script>
+    </div>
     <div class="chart-container">
         <div id="tradingview_widget_container"></div>
+        
+        <!-- News Timeline Widget Container -->
+        <div class="news-timeline-container">
+            <button class="news-toggle-button">
+                <i class="fas fa-newspaper"></i>
+            </button>
+            <div class="tradingview-widget-container timeline-widget">
+                <iframe 
+                    scrolling="no" 
+                    allowtransparency="true" 
+                    frameborder="0" 
+                    style="user-select: none; box-sizing: border-box; display: block; height: calc(100% - 0px); width: 100%;" 
+                    src="https://www.tradingview-widget.com/embed-widget/timeline/?market=crypto#%7B%22market%22%3A%22crypto%22%2C%22isTransparent%22%3Afalse%2C%22displayMode%22%3A%22compact%22%2C%22width%22%3A400%2C%22height%22%3A%22100%25%22%2C%22colorTheme%22%3A%22dark%22%2C%22utm_source%22%3A%22127.0.0.1%22%2C%22utm_medium%22%3A%22widget_new%22%2C%22utm_campaign%22%3A%22timeline%22%2C%22page-uri%22%3A%22127.0.0.1%3A3000%2Findex.html%22%7D" 
+                    title="timeline TradingView widget" 
+                    lang="en">
+                </iframe>
+            </div>
+        </div>
     </div>
+
+   
 
     <!-- Heatmap Toggle Bar -->
     <div class="widget-toggle-bar collapsed" id="toggleHeatmap">
@@ -1704,6 +2102,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const toggleBar = document.getElementById('toggleWidgets');
             const toggleHeatmap = document.getElementById('toggleHeatmap');
+            const toggleSymbolOverviewBar = document.getElementById('toggleSymbolOverview');
             
             if (toggleBar) {
                 toggleBar.addEventListener('click', toggleWidgets);
@@ -1711,6 +2110,10 @@
             
             if (toggleHeatmap) {
                 toggleHeatmap.addEventListener('click', toggleHeatmapWidget);
+            }
+
+            if (toggleSymbolOverviewBar) {
+                toggleSymbolOverviewBar.addEventListener('click', toggleSymbolOverview);
             }
         });
 
@@ -1745,6 +2148,48 @@
                 }, 50);
             }
         }
+
+        // Add Symbol Overview toggle function
+        function toggleSymbolOverview() {
+            const symbolOverviewContainer = document.querySelector('.symbol-overview-widget');
+            const toggleBar = document.getElementById('toggleSymbolOverview');
+            const toggleText = toggleBar.querySelector('.toggle-text');
+            const toggleIcon = toggleBar.querySelector('.toggle-icon');
+            
+            const isVisible = !toggleBar.classList.contains('collapsed');
+            
+            if (isVisible) {
+                symbolOverviewContainer.style.opacity = '0';
+                toggleBar.classList.add('collapsed');
+                toggleText.textContent = 'Show Symbol Overview';
+                toggleIcon.style.opacity = '1';
+                toggleIcon.style.transform = 'translateY(0)';
+                setTimeout(() => {
+                    symbolOverviewContainer.style.display = 'none';
+                }, 300);
+            } else {
+                symbolOverviewContainer.style.display = 'block';
+                toggleBar.classList.remove('collapsed');
+                toggleText.textContent = 'Symbol Overview';
+                toggleIcon.style.opacity = '0';
+                toggleIcon.style.transform = 'translateY(-10px)';
+                symbolOverviewContainer.style.opacity = '0';
+                setTimeout(() => {
+                    symbolOverviewContainer.style.transition = 'opacity 0.3s ease';
+                    symbolOverviewContainer.style.opacity = '1';
+                }, 50);
+            }
+        }
+
+        // News Timeline Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const newsContainer = document.querySelector('.news-timeline-container');
+            const toggleButton = document.querySelector('.news-toggle-button');
+            
+            toggleButton.addEventListener('click', function() {
+                newsContainer.classList.toggle('open');
+            });
+        });
     </script>
 </body>
 </html>

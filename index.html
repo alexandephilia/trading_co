@@ -286,16 +286,34 @@
             letter-spacing: 0;
         }
 
-        .sentiment.bullish {
+        .sentiment.bullish, .sentiment.strong-bullish {
             color: #26a69a;
             text-shadow: 0 0 10px rgba(38, 166, 154, 0.4),
                          0 0 20px rgba(38, 166, 154, 0.2);
         }
 
-        .sentiment.bearish {
+        .sentiment.mildly-bullish {
+            color: #66bb6a;
+            text-shadow: 0 0 10px rgba(102, 187, 106, 0.4),
+                         0 0 20px rgba(102, 187, 106, 0.2);
+        }
+
+        .sentiment.bearish, .sentiment.strong-bearish {
             color: #ef5350;
             text-shadow: 0 0 10px rgba(239, 83, 80, 0.4),
                          0 0 20px rgba(239, 83, 80, 0.2);
+        }
+
+        .sentiment.mildly-bearish {
+            color: #ff7043;
+            text-shadow: 0 0 10px rgba(255, 112, 67, 0.4),
+                         0 0 20px rgba(255, 112, 67, 0.2);
+        }
+
+        .sentiment.neutral {
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.4),
+                         0 0 20px rgba(255, 235, 59, 0.2);
         }
 
         .positive {
@@ -2195,33 +2213,31 @@
         }
 
         function calculateSentiment(data) {
-            // Enhanced sentiment calculation with volume consideration
             const priceChange = parseFloat(data.P);
             const volumeChange = parseFloat(data.v);
             const quoteVolumeChange = parseFloat(data.q);
             const trades = parseInt(data.n);
-            const avgTradeSize = quoteVolumeChange / trades;
             
             let sentiment = {
                 text: 'Neutral',
                 class: ''
             };
 
-            // Volume-weighted sentiment analysis
-            const volumeWeight = avgTradeSize > 1000 ? 1.5 : 1; // Give more weight to larger trades
-
-            if (priceChange > 2 && volumeChange > 0) {
-                sentiment.text = volumeWeight > 1 ? 'Strong Bullish' : 'Bullish';
+            if (priceChange > 2) {
+                sentiment.text = 'Strong Bullish';
                 sentiment.class = 'bullish';
-            } else if (priceChange < -2 && volumeChange > 0) {
-                sentiment.text = volumeWeight > 1 ? 'Strong Bearish' : 'Bearish';
+            } else if (priceChange < -2) {
+                sentiment.text = 'Strong Bearish';
                 sentiment.class = 'bearish';
-            } else if (priceChange > 0) {
+            } else if (priceChange > 0.5) {
                 sentiment.text = 'Mildly Bullish';
-                sentiment.class = 'bullish';
-            } else if (priceChange < 0) {
+                sentiment.class = 'mildly-bullish';
+            } else if (priceChange < -0.5) {
                 sentiment.text = 'Mildly Bearish';
-                sentiment.class = 'bearish';
+                sentiment.class = 'mildly-bearish';
+            } else {
+                sentiment.text = 'Neutral';
+                sentiment.class = '';
             }
 
             return sentiment;

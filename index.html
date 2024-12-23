@@ -1625,8 +1625,18 @@
         let widgetsVisible = true;
 
         function connectWebSocket(symbol) {
-            // Set loading state immediately for better UX
-            setLoadingState();
+            // Set initial loading state
+            const initialState = {
+                price: priceElement.textContent,
+                percent: percentElement.textContent,
+                sentiment: sentimentElement.textContent,
+                volume: volumeElement.textContent
+            };
+
+            // Only show loading if we don't have data
+            if (initialState.price === 'Loading...') {
+                setLoadingState();
+            }
 
             // Close existing connections properly
             if (socket) {
@@ -1671,7 +1681,16 @@
                     })
                     .catch(error => {
                         console.error('Error fetching initial data:', error);
-                        setLoadingState(); // Keep loading state on error
+                        // Only set loading state if we don't have previous data
+                        if (initialState.price === 'Loading...') {
+                            setLoadingState();
+                        } else {
+                            // Keep previous data on error
+                            priceElement.textContent = initialState.price;
+                            percentElement.textContent = initialState.percent;
+                            sentimentElement.textContent = initialState.sentiment;
+                            volumeElement.textContent = initialState.volume;
+                        }
                     });
 
                 // Then connect to WebSocket for real-time updates
@@ -1701,13 +1720,32 @@
                         }
 
                         if (data.c && data.P) {  // Check for close price and price change percentage
-                            const price = parseFloat(data.c).toFixed(2);
+                            // Get the raw price string directly from the WebSocket
+                            const rawPrice = data.c;  // This preserves the exact decimal places
+                            
+                            // Format the price properly
+                            const numPrice = parseFloat(rawPrice);
+                            let formattedPrice;
+
+                            if (!numPrice || isNaN(numPrice)) {
+                                formattedPrice = '$0.00';
+                            } else if (numPrice >= 1) {
+                                // For regular numbers, use standard formatting
+                                formattedPrice = '$' + numPrice.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                            } else {
+                                // For small numbers, preserve exact decimal places from WebSocket
+                                formattedPrice = '$' + rawPrice;
+                            }
+
                             const priceChange = parseFloat(data.P).toFixed(2);
                             const volume24h = parseFloat(data.v);
                             const quoteVolume24h = parseFloat(data.q);
                             const trades24h = parseInt(data.n);
                             
-                            updateIndicators(price, priceChange, volume24h, quoteVolume24h, trades24h, data);
+                            updateIndicators(formattedPrice, priceChange, volume24h, quoteVolume24h, trades24h, data);
                         }
                     } catch (error) {
                         console.error('Error processing ticker data:', error);
@@ -1739,10 +1777,25 @@
             if (currentBinanceSymbol === targetBinanceSymbol && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                 reconnectAttempts++;
                 console.log(`Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
-                setTimeout(() => connectWebSocket(symbol), RECONNECT_DELAY * reconnectAttempts);
+                
+                // Don't set loading state on reconnect if we have data
+                const hasExistingData = priceElement.textContent !== 'Loading...';
+                
+                setTimeout(() => {
+                    // Only try to reconnect if we're still on the same symbol
+                    if (document.getElementById('symbol-selector').value === symbol) {
+                        connectWebSocket(symbol);
+                    } else {
+                        reconnectAttempts = 0; // Reset attempts if symbol changed
+                    }
+                }, RECONNECT_DELAY * reconnectAttempts);
             } else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
                 console.error('Max reconnection attempts reached');
-                setLoadingState();
+                // Only set loading state if we don't have data
+                if (!hasExistingData) {
+                    setLoadingState();
+                }
+                reconnectAttempts = 0; // Reset for next time
             }
         }
 
@@ -1758,33 +1811,47 @@
             // Don't reset fear-greed index
         }
 
-        function updateIndicators(price, priceChange, volume24h, quoteVolume24h, trades24h, data) {
-            // Update price with comma formatting
-            const formattedPrice = parseFloat(price).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-            priceElement.textContent = `$${formattedPrice}`;
-
-            // Update percentage
-            percentElement.textContent = `${priceChange}%`;
-            if (parseFloat(priceChange) >= 0) {
-                percentElement.classList.remove('negative');
-                percentElement.classList.add('positive');
-            } else {
-                percentElement.classList.remove('positive');
-                percentElement.classList.add('negative');
+        function updateIndicators(formattedPrice, priceChange, volume24h, quoteVolume24h, trades24h, data) {
+            // Only update if we have valid data
+            if (!formattedPrice || !priceChange) return;
+            
+            // Update price if changed - now formattedPrice already includes the $ symbol
+            if (priceElement.textContent !== formattedPrice) {
+                priceElement.textContent = formattedPrice;
             }
 
-            // Update volume
-            const volumeMetrics = calculateVolumeMetrics(volume24h, quoteVolume24h, trades24h);
-            volumeElement.textContent = volumeMetrics;
+            // Update percentage only if changed
+            const formattedChange = `${priceChange}%`;
+            if (percentElement.textContent !== formattedChange) {
+                percentElement.textContent = formattedChange;
+                
+                // Update classes only if needed
+                if (parseFloat(priceChange) >= 0) {
+                    percentElement.classList.remove('negative');
+                    percentElement.classList.add('positive');
+                } else {
+                    percentElement.classList.remove('positive');
+                    percentElement.classList.add('negative');
+                }
+            }
 
-            // Update sentiment
-            const sentiment = calculateSentiment(data);
-            sentimentElement.textContent = sentiment.text;
-            sentimentElement.parentElement.classList.remove('bullish', 'bearish');
-            sentimentElement.parentElement.classList.add(sentiment.class);
+            // Update volume only if we have valid data
+            if (volume24h && quoteVolume24h && trades24h) {
+                const volumeMetrics = calculateVolumeMetrics(volume24h, quoteVolume24h, trades24h);
+                if (volumeElement.textContent !== volumeMetrics) {
+                    volumeElement.textContent = volumeMetrics;
+                }
+            }
+
+            // Update sentiment only if we have valid data
+            if (data) {
+                const sentiment = calculateSentiment(data);
+                if (sentimentElement.textContent !== sentiment.text) {
+                    sentimentElement.textContent = sentiment.text;
+                    sentimentElement.parentElement.classList.remove('bullish', 'bearish');
+                    sentimentElement.parentElement.classList.add(sentiment.class);
+                }
+            }
         }
 
         function initWidget(symbol = 'BINANCE:BTCUSDT') {

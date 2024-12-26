@@ -362,19 +362,7 @@
             position: relative;
         }
 
-        .tradingview-widget-container::after {
-            content: '';
-            position: absolute;
-            bottom: -13px;
-            left: 0;
-            width: 100%;
-            height: 10px;
-            background-color: #131722;
-            box-shadow: 
-                0 -1px 0 rgba(255, 255, 255, 0.05),
-                0 1px 0 rgba(0, 0, 0, 0.2),
-                0 0 8px rgba(41, 98, 255, 0.1);
-        }
+    
 
         .tradingview-widget-container .blue-text {
             color: #2962ff;
@@ -812,6 +800,20 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
+        .widget-toggle-bar:hover {
+            background: linear-gradient(90deg, rgba(38,41,51,0.98) 0%, rgba(46,49,59,0.98) 100%);
+            box-shadow: 0 4px 12px rgba(41, 98, 255, 0.2),
+                       0 0 20px rgba(41, 98, 255, 0.1);
+            transform: translateY(-1px);
+            border-color: rgba(41, 98, 255, 0.3);
+        }
+
+        .widget-toggle-bar:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(41, 98, 255, 0.15);
+            transition: all 0.1s ease;
+        }
+
         .widget-toggle-bar::before {
             content: '';
             position: absolute;
@@ -819,25 +821,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background: linear-gradient(90deg, transparent, rgba(41, 98, 255, 0.1), transparent);
             transform: translateX(-100%);
             transition: transform 0.6s ease;
         }
 
         .widget-toggle-bar:hover::before {
             transform: translateX(100%);
-        }
-
-        .widget-toggle-bar:hover {
-            background: linear-gradient(90deg, rgba(38,41,51,0.98) 0%, rgba(46,49,59,0.98) 100%);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transform: translateY(-1px);
-        }
-
-        .widget-toggle-bar:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            transition: all 0.1s ease;
         }
 
         .widget-toggle-bar .toggle-content {
@@ -892,6 +882,13 @@
             border-color: rgba(255, 255, 255, 0.05);
         }
 
+        .widget-toggle-bar.collapsed:hover {
+            background: linear-gradient(90deg, rgba(38,41,51,0.95) 0%, rgba(46,49,59,0.95) 100%);
+            box-shadow: 0 4px 12px rgba(41, 98, 255, 0.2),
+                       0 0 20px rgba(41, 98, 255, 0.1);
+            border-color: rgba(41, 98, 255, 0.3);
+        }
+
         .widget-toggle-bar.collapsed .toggle-icon {
             opacity: 1;
             transform: translateY(0);
@@ -928,6 +925,11 @@
             color: #2962ff;
             filter: drop-shadow(0 0 6px rgba(41,98,255,0.3));
             transition: all 0.3s ease;
+        }
+
+        .widget-toggle-bar:hover .stat-item i {
+            color: #fff;
+            filter: drop-shadow(0 0 8px rgba(41,98,255,0.5));
         }
 
         .widget-toggle-bar.collapsed .widget-stats {
@@ -1180,22 +1182,152 @@
         /* News Timeline Widget Styles */
         .news-timeline-container {
             position: fixed;
-            right: -400px; /* Initially hidden */
-            top: 102px; /* Align with the top of chart container */
-            bottom: 86px; /* Add space from bottom to avoid touching the edge */
+            right: -400px;
+            top: 102px;
+            bottom: 86px;
             width: 400px;
             background: #1e222d;
             transition: right 0.3s ease;
             z-index: 1000;
             box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
             display: flex;
+            flex-direction: column;
             border-radius: 0 0 0 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-right: none;
         }
 
+        .tradingview-widget-container.timeline-widget {
+            width: 100%;
+            height: 100%;
+            background: none;
+            border: none;
+            padding: 1px;
+            margin-top: 42px;
+        }
+
+        .tradingview-widget-container.timeline-widget .tradingview-widget-container__widget,
+        .tradingview-widget-container.timeline-widget iframe {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: unset !important;
+        }
+
+        /* News Source Selector Styles */
+        .news-source-selector {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 42px;
+            background: linear-gradient(90deg, rgba(30,34,45,0.98) 0%, rgba(38,41,51,0.98) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            padding: 6px;
+            z-index: 2;
+        }
+
+        .news-source-option {
+            flex: 1;
+            height: 30px;
+            background: rgba(30, 34, 45, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #d1d4dc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-source-option i {
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .news-source-option:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .news-source-option:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+
+        .news-source-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .news-source-option:hover::before {
+            transform: translateX(100%);
+        }
+
+        .news-source-option.active {
+            background: #2962ff;
+            border-color: rgba(41, 98, 255, 0.3);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(41, 98, 255, 0.3),
+                       0 0 30px rgba(41, 98, 255, 0.2);
+        }
+
+        .news-source-option:not(.active):hover {
+            background: rgba(41, 98, 255, 0.1);
+            border-color: rgba(41, 98, 255, 0.2);
+            box-shadow: 0 0 15px rgba(41, 98, 255, 0.2),
+                       0 0 30px rgba(41, 98, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .news-source-option:not(.active):active {
+            transform: translateY(0);
+            box-shadow: 0 0 10px rgba(41, 98, 255, 0.15);
+        }
+
+        .news-source-option.active i {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
         .news-timeline-container.open {
             right: 0;
+        }
+
+        /* Remove duplicate .news-timeline-container declarations */
+
+        @media screen and (max-width: 768px) {
+            .news-timeline-container {
+                display: flex;
+                right: -300px;
+                width: 300px;
+                top: 102px;
+                bottom: 100px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .news-timeline-container {
+                right: -260px;
+                width: 260px;
+                bottom: 120px;
+            }
         }
 
         .news-toggle-button {
@@ -1266,14 +1398,6 @@
 
         .news-timeline-container.open .news-toggle-button:hover i {
             transform: scale(1.1);
-        }
-
-        .tradingview-widget-container.timeline-widget {
-            width: 100%;
-            height: 100%;
-            background: none;
-            border: none;
-            padding: 1px;
         }
 
         @media screen and (max-width: 768px) {
@@ -1599,8 +1723,19 @@
             <button class="news-toggle-button">
                 <i class="fas fa-newspaper"></i>
             </button>
+            <!-- Add News Source Selector -->
+            <div class="news-source-selector">
+                <div class="news-source-option active" data-source="tradingview">
+                    <i class="fas fa-chart-line"></i>
+                    TradingView
+                </div>
+                <div class="news-source-option" data-source="cryptopanic">
+                    <i class="fas fa-newspaper"></i>
+                    CryptoPanic
+                </div>
+            </div>
             <div class="tradingview-widget-container timeline-widget">
-                <div class="tradingview-widget-container__widget" style="user-select: none; box-sizing: border-box; display: block; height: calc(100% - 0px); width: 100%;"></div>
+                <div class="tradingview-widget-container__widget" style="user-select: none; box-sizing: border-box; display: block; height: calc(100% - 1px) !important; width: 100%;"></div>
                 <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
                 {
@@ -2404,6 +2539,57 @@
         document.addEventListener('DOMContentLoaded', function() {
             const newsContainer = document.querySelector('.news-timeline-container');
             const toggleButton = document.querySelector('.news-toggle-button');
+            const newsSourceOptions = document.querySelectorAll('.news-source-option');
+            const timelineWidget = document.querySelector('.timeline-widget');
+            
+            // News source switching functionality
+            newsSourceOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    newsSourceOptions.forEach(opt => opt.classList.remove('active'));
+                    // Add active class to clicked option
+                    this.classList.add('active');
+                    
+                    const source = this.getAttribute('data-source');
+                    if (source === 'tradingview') {
+                        // Show TradingView widget
+                        const config = {
+                            feedMode: "all_symbols",
+                            isTransparent: true,
+                            displayMode: "compact",
+                            width: "100%",
+                            height: "100%",
+                            colorTheme: "dark",
+                            locale: "en",
+                            backgroundColor: "1e222d"
+                        };
+                        
+                        timelineWidget.innerHTML = `
+                            <div class="tradingview-widget-container__widget" style="user-select: none; box-sizing: border-box; display: block; height: 100% !important; width: 100%;"></div>
+                            <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+                        `;
+                        
+                        // Create and append script element properly
+                        const script = document.createElement('script');
+                        script.type = 'text/javascript';
+                        script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-timeline.js';
+                        script.async = true;
+                        script.text = JSON.stringify(config);
+                        timelineWidget.appendChild(script);
+                    } else if (source === 'cryptopanic') {
+                        // Show CryptoPanic widget
+                        timelineWidget.innerHTML = `
+                            <iframe 
+                                src="https://cryptopanic.com/widgets/news/?bg_color=1E222D&font_family=inherit&font_size=14&header_bg_color=1E222D&header_text_color=FFFFFF&link_color=FFFFFF&news_feed=trending&posts_limit=50&text_color=D1D4DC&title=CRYPTO%20NEWS" 
+                                height="100%" 
+                                width="100%" 
+                                frameborder="0"
+                                style="height: 100% !important;">
+                            </iframe>
+                        `;
+                    }
+                });
+            });
             
             toggleButton.addEventListener('click', function() {
                 newsContainer.classList.toggle('open');
@@ -2411,4 +2597,4 @@
         });
     </script>
 </body>
-</html></html>
+</html>

@@ -973,6 +973,15 @@
             height: calc(75px - 1px) !important;
         }
 
+        /* Add mobile-specific styles */
+        @media screen and (max-width: 768px) {
+            .tradingview-widget-container.heatmap-widget,
+            .tradingview-widget-container.heatmap-widget .tradingview-widget-container__widget,
+            .tradingview-widget-container.heatmap-widget iframe {
+                height: 450px !important;
+            }
+        }
+
         .tradingview-widget-container.heatmap-widget .tradingview-widget-copyright {
             display: none !important;
         }

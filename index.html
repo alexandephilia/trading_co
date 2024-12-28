@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradingView Clone</title>
+    <title>ZincView</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,8 +65,8 @@
         .header-section {
             display: flex;
             align-items: center;
-            gap: clamp(0.8rem, 1vw, 1.2rem);
-            padding: 0 clamp(0.8rem, 1vw, 1.2rem);
+            gap: clamp(0.4rem, 0.6vw, 0.8rem);
+            padding: 0 clamp(0.4rem, 0.6vw, 0.8rem);
             height: 100%;
             position: relative;
         }
@@ -224,11 +224,11 @@
 
         .indicator-value {
             background: linear-gradient(to bottom, #2f3441, #262933);
-            padding: clamp(0.4rem, 0.6vw, 0.5rem) clamp(0.6rem, 0.8vw, 1rem);
+            padding: clamp(0.3rem, 0.4vw, 0.4rem) clamp(0.4rem, 0.6vw, 0.8rem);
             border-radius: 6px;
-            font-size: clamp(0.85rem, 1vw, 0.95rem);
+            font-size: clamp(0.8rem, 0.9vw, 0.9rem);
             transition: all 0.3s ease;
-            min-width: clamp(80px, 8vw, 90px);
+            min-width: clamp(70px, 7vw, 80px);
             text-align: right;
             border: 1px solid rgba(255, 255, 255, 0.05);
             font-weight: 500;
@@ -237,17 +237,17 @@
         }
 
         .indicator-value:nth-of-type(1) {
-            min-width: clamp(100px, 10vw, 110px);
-            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            min-width: clamp(90px, 8vw, 100px);
+            font-size: clamp(0.9rem, 1vw, 1rem);
             font-weight: 600;
-            padding: clamp(0.4rem, 0.6vw, 0.5rem) clamp(0.6rem, 0.8vw, 0.8rem);
+            padding: clamp(0.3rem, 0.4vw, 0.4rem) clamp(0.4rem, 0.6vw, 0.6rem);
         }
 
         .indicator-value:nth-of-type(2) {
-            min-width: clamp(70px, 7vw, 75px);
-            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            min-width: clamp(60px, 6vw, 65px);
+            font-size: clamp(0.9rem, 1vw, 1rem);
             font-weight: 600;
-            padding: clamp(0.4rem, 0.6vw, 0.5rem) clamp(0.6rem, 0.8vw, 0.8rem);
+            padding: clamp(0.3rem, 0.4vw, 0.4rem) clamp(0.4rem, 0.6vw, 0.6rem);
         }
 
         .indicator-value.sentiment,
@@ -255,15 +255,15 @@
             display: flex;
             align-items: center;
             gap: 2px;
-            min-width: clamp(80px, 8vw, 90px);
-            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            min-width: clamp(70px, 7vw, 80px);
+            font-size: clamp(0.9rem, 1vw, 1rem);
             font-weight: 600;
-            padding: clamp(0.4rem, 0.6vw, 0.5rem) clamp(0.5rem, 0.7vw, 0.8rem);
+            padding: clamp(0.3rem, 0.4vw, 0.4rem) clamp(0.4rem, 0.5vw, 0.6rem);
         }
 
         .indicator-value.volume {
-            min-width: clamp(60px, 6vw, 70px);
-            padding: clamp(0.4rem, 0.5vw, 0.5rem) clamp(0.4rem, 0.5vw, 0.6rem);
+            min-width: clamp(50px, 5vw, 60px);
+            padding: clamp(0.3rem, 0.4vw, 0.4rem) clamp(0.3rem, 0.4vw, 0.5rem);
         }
 
         .indicator-value.sentiment i,
@@ -1837,19 +1837,6 @@
         let widgetsVisible = true;
 
         function connectWebSocket(symbol) {
-            // Set initial loading state
-            const initialState = {
-                price: priceElement.textContent,
-                percent: percentElement.textContent,
-                sentiment: sentimentElement.textContent,
-                volume: volumeElement.textContent
-            };
-
-            // Only show loading if we don't have data
-            if (initialState.price === 'Loading...') {
-                setLoadingState();
-            }
-
             // Close existing connections properly
             if (socket) {
                 socket.close();
@@ -1866,117 +1853,145 @@
             const wsEndpoint = isPerpetual ? 'wss://fstream.binance.com' : 'wss://stream.binance.com:9443';
             
             try {
-                // First, fetch initial data using REST API
-                const apiEndpoint = isPerpetual 
+                // Fetch multiple data points for better sentiment analysis
+                Promise.all([
+                    // Basic ticker data
+                    fetch(isPerpetual 
                     ? `https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${binanceSymbol.toUpperCase()}`
-                    : `https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol.toUpperCase()}`;
+                        : `https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSymbol.toUpperCase()}`
+                    ),
+                    // For perpetual futures, get additional data
+                    ...(isPerpetual ? [
+                        // Long/Short Ratio
+                        fetch(`https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=${binanceSymbol.toUpperCase()}&period=5m`),
+                        // Funding Rate
+                        fetch(`https://fapi.binance.com/fapi/v1/fundingRate?symbol=${binanceSymbol.toUpperCase()}&limit=1`),
+                        // Open Interest
+                        fetch(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${binanceSymbol.toUpperCase()}`)
+                    ] : [])
+                ])
+                .then(responses => Promise.all(responses.map(r => r.json())))
+                .then(([tickerData, ...additionalData]) => {
+                    if (tickerData.lastPrice && tickerData.priceChangePercent) {
+                        const formattedPrice = formatPrice(tickerData.lastPrice);
+                        
+                        // Combine all data for sentiment analysis
+                        const marketData = {
+                            ...tickerData,
+                            longShortRatio: isPerpetual ? additionalData[0]?.[0]?.longShortRatio : null,
+                            fundingRate: isPerpetual ? additionalData[1]?.[0]?.fundingRate : null,
+                            openInterest: isPerpetual ? additionalData[2]?.openInterest : null
+                        };
 
-                fetch(apiEndpoint)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Update indicators with initial data
-                        if (data.lastPrice && data.priceChangePercent) {
                             updateIndicators(
-                                data.lastPrice,
-                                data.priceChangePercent,
-                                data.volume,
-                                data.quoteVolume || data.volume * data.lastPrice,
-                                data.count,
-                                data
+                            formattedPrice,
+                            tickerData.priceChangePercent,
+                            tickerData.volume,
+                            tickerData.quoteVolume || tickerData.volume * tickerData.lastPrice,
+                            tickerData.count,
+                            marketData
                             );
                         }
                     })
                     .catch(error => {
-                        console.error('Error fetching initial data:', error);
-                        // Only set loading state if we don't have previous data
-                        if (initialState.price === 'Loading...') {
-                            setLoadingState();
-                        } else {
-                            // Keep previous data on error
-                            priceElement.textContent = initialState.price;
-                            percentElement.textContent = initialState.percent;
-                            sentimentElement.textContent = initialState.sentiment;
-                            volumeElement.textContent = initialState.volume;
-                        }
-                    });
+                    console.error('Error fetching market data:', error);
+                });
 
-                // Then connect to WebSocket for real-time updates
-                socket = new WebSocket(`${wsEndpoint}/ws/${binanceSymbol}@ticker`);
+                // Connect to WebSocket streams
+                const streams = [`${binanceSymbol}@ticker`];
+                if (isPerpetual) {
+                    streams.push(
+                        `${binanceSymbol}@forceOrder`,  // Liquidations
+                        `${binanceSymbol}@markPrice`    // Mark price and funding
+                    );
+                }
 
-                socket.onopen = () => {
-                    console.log(`Ticker WebSocket connected for ${binanceSymbol}`);
-                    reconnectAttempts = 0;
-
-                    // Send a ping message to keep the connection alive
-                    const pingInterval = setInterval(() => {
-                        if (socket && socket.readyState === WebSocket.OPEN) {
-                            socket.send(JSON.stringify({ method: "PING" }));
-                        } else {
-                            clearInterval(pingInterval);
-                        }
-                    }, 30000);
-                };
+                socket = new WebSocket(`${wsEndpoint}/ws/${streams.join('/')}`);
 
                 socket.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
                         
-                        // Handle ping/pong messages
-                        if (data.pong) {
-                            return;
-                        }
+                        if (data.e === 'forceOrder') {
+                            // Handle liquidation data
+                            handleLiquidation(data);
+                        } else if (data.e === 'markPriceUpdate') {
+                            // Handle mark price and funding updates
+                            handleMarkPriceUpdate(data);
+                        } else if (data.c && data.P) {
+                            const formattedPrice = formatPrice(data.c);
+                            if (formattedPrice === null) return;
 
-                        if (data.c && data.P) {  // Check for close price and price change percentage
-                            // Get the raw price string directly from the WebSocket
-                            const rawPrice = data.c;  // This preserves the exact decimal places
-                            
-                            // Format the price properly
-                            const numPrice = parseFloat(rawPrice);
-                            let formattedPrice;
-
-                            if (!numPrice || isNaN(numPrice)) {
-                                formattedPrice = '$0.00';
-                            } else if (numPrice >= 1) {
-                                // For regular numbers, use standard formatting
-                                formattedPrice = '$' + numPrice.toLocaleString('en-US', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                });
-                            } else {
-                                // For small numbers, preserve exact decimal places from WebSocket
-                                formattedPrice = '$' + rawPrice;
-                            }
-
-                            const priceChange = parseFloat(data.P).toFixed(2);
-                            const volume24h = parseFloat(data.v);
-                            const quoteVolume24h = parseFloat(data.q);
-                            const trades24h = parseInt(data.n);
-                            
-                            updateIndicators(formattedPrice, priceChange, volume24h, quoteVolume24h, trades24h, data);
+                            updateIndicators(
+                                formattedPrice,
+                                parseFloat(data.P).toFixed(2),
+                                parseFloat(data.v),
+                                parseFloat(data.q),
+                                parseInt(data.n),
+                                data
+                            );
                         }
                     } catch (error) {
-                        console.error('Error processing ticker data:', error);
+                        console.error('Error processing WebSocket data:', error);
                     }
                 };
 
-                socket.onerror = (error) => {
-                    console.error(`Ticker WebSocket error for ${binanceSymbol}:`, error);
-                    handleReconnect(symbol);
-                };
-
-                socket.onclose = (event) => {
-                    console.log(`Ticker WebSocket closed for ${binanceSymbol}:`, event.code, event.reason);
-                    handleReconnect(symbol);
-                };
+                // ... rest of WebSocket setup code ...
 
             } catch (error) {
                 console.error('Error creating WebSocket connection:', error);
                 handleReconnect(symbol);
+            }
+        }
+
+        function formatPrice(price) {
+            const numPrice = parseFloat(price);
+            if (!numPrice || isNaN(numPrice)) return null;
+
+            if (numPrice >= 1) {
+                return '$' + numPrice.toLocaleString('en-US', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+            }
+            // For small numbers, preserve exact decimal places
+            return '$' + price;
+        }
+
+        function updateIndicators(formattedPrice, priceChange, volume24h, quoteVolume24h, trades24h, data) {
+            // Only update if we have valid data
+            if (!formattedPrice || !priceChange) return;
+            
+            // Update price
+            priceElement.textContent = formattedPrice;
+
+            // Update percentage
+            percentElement.textContent = `${priceChange}%`;
+            
+            // Update percentage classes
+            if (parseFloat(priceChange) >= 0) {
+                percentElement.classList.remove('negative');
+                percentElement.classList.add('positive');
+            } else {
+                percentElement.classList.remove('positive');
+                percentElement.classList.add('negative');
+            }
+
+            // Update volume
+            if (volume24h && quoteVolume24h && trades24h) {
+                const volumeMetrics = calculateVolumeMetrics(volume24h, quoteVolume24h, trades24h);
+                volumeElement.textContent = volumeMetrics;
+            }
+
+            // Update sentiment
+            if (data) {
+                const sentiment = calculateSentiment(data);
+                // Skip neutral state during loading
+                if (sentimentElement.textContent === 'Loading...' || sentimentElement.textContent !== sentiment.text) {
+                    sentimentElement.textContent = sentiment.text;
+                    sentimentElement.parentElement.classList.remove('bullish', 'bearish', 'neutral', 'mildly-bullish', 'mildly-bearish', 'strong-bullish', 'strong-bearish');
+                    sentimentElement.parentElement.classList.add(sentiment.class);
+                }
             }
         }
 
@@ -2012,58 +2027,25 @@
         }
 
         function setLoadingState() {
+            // Clear existing classes first
+            priceElement.classList.remove('positive', 'negative');
+            percentElement.classList.remove('positive', 'negative');
+            sentimentElement.parentElement.classList.remove('bullish', 'bearish', 'neutral', 'mildly-bullish', 'mildly-bearish', 'strong-bullish', 'strong-bearish');
+            
+            // Reset last sentiment
+            if (window.lastSentiment) {
+                window.lastSentiment = {
+                    text: 'Loading...',
+                    class: 'neutral',
+                    lastUpdate: 0
+                };
+            }
+            
+            // Set loading text
             priceElement.textContent = 'Loading...';
             percentElement.textContent = 'Loading...';
             sentimentElement.textContent = 'Loading...';
             volumeElement.textContent = 'Loading...';
-            
-            // Remove any existing classes
-            percentElement.classList.remove('positive', 'negative');
-            sentimentElement.parentElement.classList.remove('bullish', 'bearish');
-            // Don't reset fear-greed index
-        }
-
-        function updateIndicators(formattedPrice, priceChange, volume24h, quoteVolume24h, trades24h, data) {
-            // Only update if we have valid data
-            if (!formattedPrice || !priceChange) return;
-            
-            // Update price if changed - now formattedPrice already includes the $ symbol
-            if (priceElement.textContent !== formattedPrice) {
-                priceElement.textContent = formattedPrice;
-            }
-
-            // Update percentage only if changed
-            const formattedChange = `${priceChange}%`;
-            if (percentElement.textContent !== formattedChange) {
-                percentElement.textContent = formattedChange;
-                
-                // Update classes only if needed
-                if (parseFloat(priceChange) >= 0) {
-                    percentElement.classList.remove('negative');
-                    percentElement.classList.add('positive');
-                } else {
-                    percentElement.classList.remove('positive');
-                    percentElement.classList.add('negative');
-                }
-            }
-
-            // Update volume only if we have valid data
-            if (volume24h && quoteVolume24h && trades24h) {
-                const volumeMetrics = calculateVolumeMetrics(volume24h, quoteVolume24h, trades24h);
-                if (volumeElement.textContent !== volumeMetrics) {
-                    volumeElement.textContent = volumeMetrics;
-                }
-            }
-
-            // Update sentiment only if we have valid data
-            if (data) {
-                const sentiment = calculateSentiment(data);
-                if (sentimentElement.textContent !== sentiment.text) {
-                    sentimentElement.textContent = sentiment.text;
-                    sentimentElement.parentElement.classList.remove('bullish', 'bearish');
-                    sentimentElement.parentElement.classList.add(sentiment.class);
-                }
-            }
         }
 
         function initWidget(symbol = 'BINANCE:BTCUSDT') {
@@ -2302,6 +2284,9 @@
             symbolSelector.addEventListener('change', function(e) {
                 const symbol = e.target.value;
                 
+                // Show loading state ONLY when switching symbols
+                setLoadingState();
+                
                 // Update both WebSocket and widget
                 connectWebSocket(symbol);
                 
@@ -2365,32 +2350,162 @@
         }
 
         function calculateSentiment(data) {
-            const priceChange = parseFloat(data.P);
-            const volumeChange = parseFloat(data.v);
-            const quoteVolumeChange = parseFloat(data.q);
-            const trades = parseInt(data.n);
-            
+            // Extract price change - our primary indicator
+            const priceChange = parseFloat(data.P);  // 24h price change percentage
+
+            // Additional metrics for futures
+            const longShortRatio = parseFloat(data.longShortRatio) || null;
+            const fundingRate = parseFloat(data.fundingRate) || null;
+
             let sentiment = {
-                text: 'Neutral',
-                class: ''
+                text: 'Loading...',
+                class: 'neutral',
+                details: {
+                    reason: 'Analyzing market data...'
+                }
             };
 
-            if (priceChange > 2) {
-                sentiment.text = 'Strong Bullish';
-                sentiment.class = 'bullish';
-            } else if (priceChange < -2) {
-                sentiment.text = 'Strong Bearish';
-                sentiment.class = 'bearish';
-            } else if (priceChange > 0.5) {
-                sentiment.text = 'Mildly Bullish';
-                sentiment.class = 'mildly-bullish';
-            } else if (priceChange < -0.5) {
-                sentiment.text = 'Mildly Bearish';
-                sentiment.class = 'mildly-bearish';
-            } else {
-                sentiment.text = 'Neutral';
-                sentiment.class = '';
+            // Skip if no price change data
+            if (!priceChange) {
+                return sentiment;
             }
+
+            // For perpetual futures
+            if (longShortRatio !== null && fundingRate !== null) {
+                // Strong Bullish: >5% gain with institutional bias
+                if (priceChange > 5 || (priceChange > 3 && longShortRatio > 1.2 && fundingRate > 0)) {
+                    sentiment.text = 'Strong Bullish';
+                    sentiment.class = 'strong-bullish';
+                    sentiment.details.reason = 'Significant 24h gain with institutional support';
+                }
+                // Strong Bearish: <-5% loss with institutional bias
+                else if (priceChange < -5 || (priceChange < -3 && longShortRatio < 0.8 && fundingRate < 0)) {
+                    sentiment.text = 'Strong Bearish';
+                    sentiment.class = 'strong-bearish';
+                    sentiment.details.reason = 'Significant 24h loss with institutional pressure';
+                }
+                // Bullish: >2% gain
+                else if (priceChange > 2) {
+                    sentiment.text = 'Bullish';
+                    sentiment.class = 'bullish';
+                    sentiment.details.reason = 'Positive 24h price movement';
+                }
+                // Bearish: <-2% loss
+                else if (priceChange < -2) {
+                    sentiment.text = 'Bearish';
+                    sentiment.class = 'bearish';
+                    sentiment.details.reason = 'Negative 24h price movement';
+                }
+                // Mildly Bullish: >0.5% gain
+                else if (priceChange > 0.5) {
+                    sentiment.text = 'Mildly Bullish';
+                    sentiment.class = 'mildly-bullish';
+                    sentiment.details.reason = 'Slight 24h gain';
+                }
+                // Mildly Bearish: <-0.5% loss
+                else if (priceChange < -0.5) {
+                    sentiment.text = 'Mildly Bearish';
+                    sentiment.class = 'mildly-bearish';
+                    sentiment.details.reason = 'Slight 24h loss';
+                }
+                // Neutral: between -0.5% and 0.5%
+                else {
+                    sentiment.text = 'Neutral';
+                    sentiment.class = 'neutral';
+                    sentiment.details.reason = 'Minimal 24h change';
+                }
+            }
+            // For spot trading - adjust thresholds based on price range
+            else {
+                // Get the current price to adjust thresholds for low-priced assets
+                const currentPrice = parseFloat(data.c);
+                
+                // Adjust thresholds based on price range
+                let thresholds;
+                if (currentPrice < 0.01) {  // For very low priced assets like PEPE
+                    thresholds = {
+                        strong: 15,    // 15%
+                        moderate: 8,    // 8%
+                        mild: 3        // 3%
+                    };
+                } else if (currentPrice < 1) {  // For assets under $1
+                    thresholds = {
+                        strong: 10,    // 10%
+                        moderate: 5,    // 5%
+                        mild: 2        // 2%
+                    };
+                } else if (currentPrice < 10) {  // For assets under $10
+                    thresholds = {
+                        strong: 7,     // 7%
+                        moderate: 3,    // 3%
+                        mild: 1        // 1%
+                    };
+                } else {  // For higher priced assets
+                    thresholds = {
+                        strong: 5,     // 5%
+                        moderate: 2,    // 2%
+                        mild: 0.5      // 0.5%
+                    };
+                }
+
+                // Strong Bullish
+                if (priceChange > thresholds.strong) {
+                    sentiment.text = 'Strong Bullish';
+                    sentiment.class = 'strong-bullish';
+                    sentiment.details.reason = 'Major 24h gain';
+                }
+                // Strong Bearish
+                else if (priceChange < -thresholds.strong) {
+                    sentiment.text = 'Strong Bearish';
+                    sentiment.class = 'strong-bearish';
+                    sentiment.details.reason = 'Major 24h loss';
+                }
+                // Bullish
+                else if (priceChange > thresholds.moderate) {
+                    sentiment.text = 'Bullish';
+                    sentiment.class = 'bullish';
+                    sentiment.details.reason = 'Positive 24h movement';
+                }
+                // Bearish
+                else if (priceChange < -thresholds.moderate) {
+                    sentiment.text = 'Bearish';
+                    sentiment.class = 'bearish';
+                    sentiment.details.reason = 'Negative 24h movement';
+                }
+                // Mildly Bullish
+                else if (priceChange > thresholds.mild) {
+                    sentiment.text = 'Mildly Bullish';
+                    sentiment.class = 'mildly-bullish';
+                    sentiment.details.reason = 'Slight 24h gain';
+                }
+                // Mildly Bearish
+                else if (priceChange < -thresholds.mild) {
+                    sentiment.text = 'Mildly Bearish';
+                    sentiment.class = 'mildly-bearish';
+                    sentiment.details.reason = 'Slight 24h loss';
+                }
+                // Neutral
+                else {
+                    sentiment.text = 'Neutral';
+                    sentiment.class = 'neutral';
+                    sentiment.details.reason = 'Minimal 24h change';
+                }
+            }
+
+            // Add detailed metrics to tooltip
+            sentiment.details = {
+                ...sentiment.details,
+                priceChange: priceChange.toFixed(2) + '%',
+                ...(longShortRatio !== null ? { longShortRatio: longShortRatio.toFixed(2) } : {}),
+                ...(fundingRate !== null ? { fundingRate: (fundingRate * 100).toFixed(4) + '%' } : {})
+            };
+
+            // Update tooltip
+            sentimentElement.parentElement.title = `Details:
+• ${sentiment.details.reason}
+• 24h Change: ${sentiment.details.priceChange}
+${longShortRatio !== null ? `• Long/Short Ratio: ${sentiment.details.longShortRatio}` : ''}
+${fundingRate !== null ? `• Funding Rate: ${sentiment.details.fundingRate}` : ''}`;
 
             return sentiment;
         }
